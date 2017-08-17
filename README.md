@@ -4,6 +4,13 @@ Check_mk-rbl is a simble rbl-check-plugin for check_mk. This plugin gathers all 
 
 This project is a fork of [HeinleinSupports version](https://github.com/HeinleinSupport/check_mk).
 
+
+## Requirements
+
+* python-dnspython
+* python-netifaces
+* python-ipy    
+
 ## Install
 
 ### Using Check_MK Package
