@@ -1,6 +1,6 @@
 # check_mk-rbl
 
-Check_mk-rbl is a simble rbl-check-plugin for check_mk. This plugin gathers all IPv4-adresses of a server and checks all public adresses if they are listed on any blacklist.  
+Check_mk-rbl is a simble rbl-check-plugin for check_mk. This plugin gathers all IPv4-adresses of a server and checks public adresses if they are listed on any blacklist.  
 
 This project is a fork of [HeinleinSupports version](https://github.com/HeinleinSupport/check_mk).
 
