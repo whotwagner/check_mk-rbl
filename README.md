@@ -6,6 +6,16 @@ This project is a fork of [HeinleinSupports version](https://github.com/Heinlein
 
 ## Install
 
+### Using Check_MK Package
+
+Clone the repo and install the Check_MK Package:
+```
+check_mk -vP install check_mk-rbl-1.0.mkp 
+```
+
+If you are using OMD, you need to become the user of your OMD environment before, (e.g. su - prod).
+
+### Manually
 Just copy the agent/plugin into /usr/lib/check_mk_agent/plugins/ of the check_mk-Agent  and the check-file into /opt/omd/versions/default/share/check_mk/checks/ of the check_mk-Server.
 
 
