@@ -1,0 +1,162 @@
+#!/bin/bash
+
+#################################################################
+#                                                               #
+#                               mk_rbl                          #
+#                                                               #
+# RBL Check Plugin for check_mk                                 #
+#                                                               #
+# This REQUIRES "perl", "bash", "dig" and "curl".               #
+#                                                               #
+# Copyright (c), 2018 René Jochum <rene@webmeisterei.com>       #
+# Licensed under the GPLv2                                      #
+# ###############################################################
+
+DNSBLIST=( 
+    all.s5h.net
+    b.barracudacentral.org
+    # bl.emailbasura.org - Very slow disabled.
+    bl.spamcannibal.org
+    bl.spamcop.net
+    blacklist.woody.ch
+    bogons.cymru.com
+    cbl.abuseat.org
+    cdl.anti-spam.org.cn
+    combined.abuse.ch
+    db.wpbl.info
+    dnsbl-1.uceprotect.net
+    dnsbl-2.uceprotect.net
+    dnsbl-3.uceprotect.net
+    dnsbl.anticaptcha.net
+    dnsbl.dronebl.org
+    dnsbl.inps.de
+    dnsbl.sorbs.net
+    # dnsbl.spfbl.net - Wrong output
+    drone.abuse.ch
+    duinv.aupads.org
+    dul.dnsbl.sorbs.net
+    dyna.spamrats.com
+    dynip.rothen.com
+    http.dnsbl.sorbs.net
+    ips.backscatterer.org
+    ix.dnsbl.manitu.net
+    korea.services.net
+    misc.dnsbl.sorbs.net
+    noptr.spamrats.com
+    orvedb.aupads.org
+    pbl.spamhaus.org
+    proxy.bl.gweep.ca
+    psbl.surriel.com
+    relays.bl.gweep.ca
+    relays.nether.net
+    sbl.spamhaus.org
+    # short.rbl.jp - Very slow disabled.
+    singular.ttk.pte.hu
+    smtp.dnsbl.sorbs.net
+    socks.dnsbl.sorbs.net
+    spam.abuse.ch
+    spam.dnsbl.anonmails.de
+    spam.dnsbl.sorbs.net
+    spam.spamrats.com
+    spambot.bls.digibase.ca
+    spamrbl.imp.ch
+    spamsources.fabel.dk
+    ubl.lashback.com
+    ubl.unsubscore.com
+    # virus.rbl.jp - Very slow disabled.
+    web.dnsbl.sorbs.net
+    wormrbl.imp.ch
+    xbl.spamhaus.org
+    z.mailspike.net
+    zen.spamhaus.org
+    zombie.dnsbl.sorbs.net
+)
+
+IP=""
+IP_CHECK_URL="http://ifconfig.me/ip"
+IP_CHECK_CACHE="/var/lib/check_mk_agent/mk_rbl-official-ip"
+
+# Load config from /etc/check_mk/rbl.sh
+test -e $MK_CONFDIR/mk_rbl.sh && source $MK_CONFDIR/mk_rbl.sh
+
+ip=""
+
+# reverse IP address
+function convertIP() {
+    set `IFS=".";echo $1`
+    echo $4.$3.$2.$1
+}
+
+# Get the NAT IP from the URL and cache it in $IP_CHECK_CACHE.
+function getIP() {
+    if [ -e ${IP_CHECK_CACHE} ]; then
+        AGE=$(perl -e 'print int -M $ARGV[0]' ${IP_CHECK_CACHE})
+
+        if [ ${AGE} -le 1 ]; then
+            ip=$(cat ${IP_CHECK_CACHE})
+            return
+        fi
+    fi
+
+    ip=$(curl -s ${IP_CHECK_URL})
+    mkdir -p `dirname ${IP_CHECK_CACHE}`
+    echo ${ip} > ${IP_CHECK_CACHE}
+}
+
+
+function usage()
+{
+    echo "Usage: ${0} [-H] <host>] [-p]"
+    echo " -H check Host "
+    echo " -p print list of DNSBLs"
+    exit 3
+}
+
+# Checks the IP with list of DNSBL servers
+function check()
+{
+    if [ "${ip}x" == "x" ]; then
+        getIP
+
+        if [ "${ip}x" == "x" ]; then
+            exit 1
+        fi
+    fi
+    local ip_arpa=$(convertIP ${ip})
+
+    echo '<<<rbl_check>>>'
+
+    for i in ${DNSBLIST[@]}; do
+        if $(dig $ip_arpa.$i | grep -q "ANSWER SECTION:"); then
+            echo ${ip} ${i} "found"
+        else
+            echo ${ip} ${i} "notfound"
+        fi
+    done
+    exit 0
+}
+
+
+case $1 in
+ -H)
+    if [ -z "$2" ]; then
+        echo "ip address missing"
+        exit
+    fi
+    ip=${2}
+    check
+    ;;
+ -p)
+    for i in ${DNSBLIST[@]}; do
+        echo $i
+    done
+    exit
+    ;;
+ --help)
+    usage
+    exit
+    ;;
+ *)
+    check
+    ;;
+esac
