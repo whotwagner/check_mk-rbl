@@ -124,9 +124,9 @@ function check()
 
     for i in ${DNSBLIST[@]}; do
         if $(dig $ip_arpa.$i | grep -q "ANSWER SECTION:"); then
-            echo ${ip}, ${i}, "found"
+            echo ${ip} ${i} "found"
         else
-            echo ${ip}, ${i}, "notfound"
+            echo ${ip} ${i} "notfound"
         fi
     done
     exit 0
