@@ -31,7 +31,7 @@ DNSBLIST=(
     dnsbl.dronebl.org
     dnsbl.inps.de
     dnsbl.sorbs.net
-    dnsbl.spfbl.net
+    # dnsbl.spfbl.net - Wrong output
     drone.abuse.ch
     duinv.aupads.org
     dul.dnsbl.sorbs.net
@@ -93,7 +93,7 @@ function getIP() {
         AGE=$(perl -e 'print int -M $ARGV[0]' ${IP_CHECK_CACHE})
 
         if [ ${AGE} -le 1 ]; then
-            ip=$(cat ${IP_CHECK_URL})
+            ip=$(cat ${IP_CHECK_CACHE})
             return
         fi
     fi
@@ -117,6 +117,10 @@ function check()
 {
     if [ "${ip}x" == "x" ]; then
         getIP
+
+        if [ "${ip}x" == "x" ]; then
+            exit 1
+        fi
     fi
     local ip_arpa=$(convertIP ${ip})
 
