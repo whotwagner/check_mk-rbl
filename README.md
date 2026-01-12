@@ -1,3 +1,6 @@
+> [!WARNING]  
+> This repository has been moved to [https://codeberg.org/whotwagner/check_mk-rbl](https://codeberg.org/whotwagner/check_mk-rbl). Please visit the new location for the latest updates.
+
 # check_mk-rbl
 
 Check_mk-rbl is a simble rbl-check-plugin for check_mk. This plugin gathers all IPv4-adresses of a server and checks public adresses if they are listed on any blacklist.  
